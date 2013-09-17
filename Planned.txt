@@ -1,0 +1,2 @@
+TODO:
+	Make tiles not visible if they are "discovered" yet.
