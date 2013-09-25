@@ -10,9 +10,11 @@ import java.awt.image.DataBufferInt;
 import javax.swing.JFrame;
 
 import com.bh.city.graphics.Screen;
+import com.bh.city.gui.GUIImage;
 import com.bh.city.gui.GUIManager;
-import com.bh.city.gui.windows.ResourceWindow;
+import com.bh.city.gui.windows.ResourceListWindow;
 import com.bh.city.input.MouseHandler;
+import com.bh.city.sprites.Sprite;
 import com.bh.city.town.Town;
 import com.bh.city.town.buildings.SolarPanel;
 import com.bh.city.world.World;
@@ -40,8 +42,8 @@ public class Game extends Canvas implements Runnable {
 	
 	public static GUIManager gui;
 	
-	public int x = 0;
-	public int y = 0;
+	public int x = World.WIDTH / 2 * 16;
+	public int y = World.HEIGHT / 2 * 16;
 	
 	public void start() {
 		if(running)
@@ -66,8 +68,12 @@ public class Game extends Canvas implements Runnable {
 		town.addBuilding(new SolarPanel(0, 150, town));
 		
 		gui = new GUIManager();
-		gui.addObject(new ResourceWindow(town.ENERGY, gui, 200, 0, 100, 100));
-		gui.addObject(new ResourceWindow(town.WATER, gui, 0, 0, 100, 100));
+		gui.addObject(new GUIImage(gui, 10, HEIGHT - 10, Sprite.guimap.getSprite(0)) {
+			public void onLeftClick() {
+				if(!MouseHandler.buttonDownOnce(1)) return;
+				parent.addObject(new ResourceListWindow(parent, 10, 10));
+			}
+		});
 	}
 	
 	public void run() {

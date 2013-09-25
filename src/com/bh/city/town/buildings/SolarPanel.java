@@ -13,7 +13,7 @@ public class SolarPanel extends Building {
 		super(tileX, tileY, t);
 		
 		output.ENERGY.storage = 10000;
-		output.ENERGY.output = (t.getWorld().getBiome(tileX, tileY)==Biome.DESERT) ? 5 : 1;
+		output.ENERGY.output = (t.getWorld().getBiome(tileX, tileY)==Biome.DESERT) ? 2.5 : .5;
 		output.ENERGY.input = 0;
 		output.WATER.input = 3;
 		

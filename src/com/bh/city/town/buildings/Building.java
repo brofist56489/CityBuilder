@@ -2,8 +2,6 @@ package com.bh.city.town.buildings;
 
 import java.awt.Rectangle;
 
-import javax.swing.JOptionPane;
-
 import com.bh.city.Game;
 import com.bh.city.gui.windows.BuildingWindow;
 import com.bh.city.town.Town;
@@ -49,11 +47,6 @@ public class Building {
 	}
 
 	public void onMiddleClick() {
-		new Thread() {
-			public void run() {
-				JOptionPane.showMessageDialog(null, "asdf", "asdf", JOptionPane.ERROR_MESSAGE);
-			}
-		}.start();
 	}
 
 	public void onRightClick() {

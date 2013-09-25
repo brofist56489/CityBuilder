@@ -34,9 +34,9 @@ public class ResourceWindow extends GUIWindow {
 	}
 	
 	public void tick() {
-		valdisp.setText(resource.val+"");
+		valdisp.setText((int)resource.val+"");
 		maxdisp.setText(resource.max+"");
-		lossdisp.setText(resource.loss+"");
-		psdisp.setText(resource.persec+"");
+		lossdisp.setText((int)resource.loss+"");
+		psdisp.setText((int)resource.persec+"");
 	}
 }

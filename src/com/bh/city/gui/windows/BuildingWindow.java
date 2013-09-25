@@ -67,9 +67,9 @@ public class BuildingWindow extends GUIWindow {
 		}
 	}
 	protected void setDisps(Outs out) {
-		psdisp.setText((int)out.output * 10 + "");
+		psdisp.setText((int)(out.output * 10) + "");
 		storagedisp.setText((int)out.storage + "");
-		costdisp.setText((int)out.input * 10 + "");
+		costdisp.setText((int)(out.input * 10) + "");
 	}
 	
 	public void render() {
