@@ -21,16 +21,20 @@ public class Town {
 
 	public Town(World world) {
 		this.world = world;
-		addVisibleArea(World.WIDTH / 2, World.HEIGHT / 2, 10);
+		for(int y=0; y<world.height; y++) {
+			for(int x=0; x<world.width; x++) {
+				world.setTileVisible(x, y, true);
+			}
+		}
 	}
 	
 	public void addVisibleArea(int xp, int yp, int r) {
 		for(int y=-r; y <= r; y++) {
 			int yy = y + yp;
-			if(yy < 0 || yy >= World.HEIGHT) continue; 
+			if(yy < 0 || yy >= world.height) continue; 
 			for(int x=-r; x <= r; x++) {
 				int xx = x + xp;
-				if(xx < 0 || xx >= World.WIDTH) continue;
+				if(xx < 0 || xx >= world.height) continue;
 				
 				int dist = (x * x) + (y * y);
 				if(dist > r * r) continue;

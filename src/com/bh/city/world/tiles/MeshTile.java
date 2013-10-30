@@ -30,22 +30,34 @@ public class MeshTile extends Tile {
 		y *= TILE_HEIGHT;
 
 		if(u && l) {
-			Screen.render(Sprite.tilemap, 3 + textPos, x, y, 0);
+			if(ul)
+				Screen.render(Sprite.tilemap, 4 + textPos, x, y, 0);
+			else
+				Screen.render(Sprite.tilemap, 3 + textPos, x, y, 0);
 		} else
 				Screen.render(Sprite.tilemap, (u ? 2 : 0) + (l ? 1 : 0) + textPos, x, y, 0);
 		
 		if(u && r) {
-			Screen.render(Sprite.tilemap, 3 + textPos, x + 8, y, 0);
+			if(ur)
+				Screen.render(Sprite.tilemap, 4 + textPos, x + 8, y, 0);
+			else
+				Screen.render(Sprite.tilemap, 3 + textPos, x + 8, y, 1);
 		} else
 			Screen.render(Sprite.tilemap, (u ? 2 : 0) + (r ? 1 : 0) + textPos, x + 8, y, (r ? 0 : 1));
 		
 		if(d && l) {
-			Screen.render(Sprite.tilemap, 3 + textPos, x, y + 8, 0);
+			if(dl)
+				Screen.render(Sprite.tilemap, 4 + textPos, x, y + 8, 0);
+			else
+				Screen.render(Sprite.tilemap, 3 + textPos, x, y + 8, 2);
 		} else
 			Screen.render(Sprite.tilemap, (d ? 2 : 0) + (l ? 1 : 0) + textPos, x, y + 8, (d ? 0 : 2));
 		
 		if(d && r) {
-			Screen.render(Sprite.tilemap, 3 + textPos, x + 8, y + 8, 0);
+			if(dr)
+				Screen.render(Sprite.tilemap, 4 + textPos, x + 8, y + 8, 0);
+			else
+				Screen.render(Sprite.tilemap, 3 + textPos, x + 8, y + 8, 3);
 		} else
 			Screen.render(Sprite.tilemap, (d ? 2 : 0) + (r ? 1 : 0) + textPos, x + 8, y + 8, 3 - (d ? 2 : 0) - (r ? 1 : 0));
 	}

@@ -10,11 +10,13 @@ public class Tile {
 	public static final int TILE_HEIGHT = 16;
 	public static Tile[] tiles = new Tile[128];
 	
-	public static final Tile GRASS = new GrassTile(0);
-	public static final Tile SAND = new SandTile(1);
-	public static final Tile ROCK = new RockTile(2);
-	public static final Tile TREE = new TreeTile(3);
-	public static final Tile WATER = new WaterTile(4);
+	public static final Tile VOID = new Tile(0, 0, false) { public void render(int x, int y, World w) { } } ;
+	public static final Tile GRASS = new GrassTile(1);
+	public static final Tile SAND = new SandTile(2);
+	public static final Tile ROCK = new RockTile(3);
+	public static final Tile TREE = new TreeTile(4);
+	public static final Tile WATER = new WaterTile(5);
+	public static final Tile ROAD = new MeshTile(6, 36, true);
 	
 	protected final int id;
 	protected int textPos;

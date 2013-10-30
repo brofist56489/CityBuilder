@@ -1,7 +1,6 @@
 package com.bh.city;
 
 import java.awt.Canvas;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
@@ -9,6 +8,8 @@ import java.awt.image.DataBufferInt;
 
 import javax.swing.JFrame;
 
+import com.bh.city.graphics.Light;
+import com.bh.city.graphics.Mouse;
 import com.bh.city.graphics.Screen;
 import com.bh.city.gui.GUIImage;
 import com.bh.city.gui.GUIManager;
@@ -23,6 +24,7 @@ public class Game extends Canvas implements Runnable {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static JFrame frame;
 	private static Thread game_thread;
 	private static boolean running = false;
 	
@@ -42,8 +44,13 @@ public class Game extends Canvas implements Runnable {
 	
 	public static GUIManager gui;
 	
-	public int x = World.WIDTH / 2 * 16;
-	public int y = World.HEIGHT / 2 * 16;
+	public int x = 0;
+	public int y = 0;
+	private Light mouseLight;
+	
+	public Game() {
+		instance = this;
+	}
 	
 	public void start() {
 		if(running)
@@ -58,12 +65,14 @@ public class Game extends Canvas implements Runnable {
 	}
 	
 	public void init() {
-		instance = this;
 		
 		Screen.init();
 		MouseHandler.init(this);
 		
-		world = new World();
+		mouseLight = new Light(0, 0, 50, 255, 255, 255);
+		Screen.addLightSource(mouseLight);
+		
+		world = World.loadFromImage("/testLevel.png");
 		town = new Town(world);
 		town.addBuilding(new SolarPanel(0, 150, town));
 		
@@ -71,7 +80,14 @@ public class Game extends Canvas implements Runnable {
 		gui.addObject(new GUIImage(gui, 10, HEIGHT - 10, Sprite.guimap.getSprite(0)) {
 			public void onLeftClick() {
 				if(!MouseHandler.buttonDownOnce(1)) return;
+				
 				parent.addObject(new ResourceListWindow(parent, 10, 10));
+			}
+		});
+		gui.addObject(new GUIImage(gui, 25, HEIGHT - 11, Sprite.guimap.getSprite(1)) {
+			public void onLeftClick() {
+				if(!MouseHandler.buttonDownOnce(1)) return;
+				System.out.println("FUNCTION NOT IMPLEMENTED YET");
 			}
 		});
 	}
@@ -81,7 +97,7 @@ public class Game extends Canvas implements Runnable {
 		
 		long lt = System.nanoTime();
 		double delta = 0.0;
-		double nsPt = 1000000000.0/60.0;
+		double nsPt = 1000000000.0/30.0;
 		long now;
 		int ticks = 0, frames = 0;
 		long ltr = System.currentTimeMillis();
@@ -104,6 +120,7 @@ public class Game extends Canvas implements Runnable {
 				render();
 				frames++;
 			}
+			
 			if(System.currentTimeMillis() - ltr >= 1000) {
 				ltr += 1000;
 				System.out.println(ticks + " ticks, " + frames + " frames");
@@ -116,6 +133,7 @@ public class Game extends Canvas implements Runnable {
 		tickCount++;
 		MouseHandler.poll();
 		
+		
 		if(MouseHandler.buttonDown(1)) {
 			if(gui.onLeftClick()) {}
 			else if(MouseHandler.hasMoved()) {
@@ -123,35 +141,34 @@ public class Game extends Canvas implements Runnable {
 				y -= MouseHandler.ry;
 			}
 		}
-		if(MouseHandler.getButton() !=  -1) {
+		if(MouseHandler.getButton() != -1) {
 			town.onclick();
 		}
 		
 		world.tick();
-		if(tickCount % 6 == 0)
+		if(tickCount % 3 == 0)
 			town.tick();
 		
 		gui.tick();
+		
+		mouseLight.moveTo(MouseHandler.transX(), MouseHandler.transY());
 		
 		MouseHandler.postTick();
 	}
 	
 	public void render() {
-		Screen.LIGHTING_ENABLED = false;
-		Screen.clearLighting(tickCount % 255);
+		Screen.LIGHTING_ENABLED = true;
+		Screen.clear(0);
 		Screen.centerOn(x, y);
+		Screen.clearLighting(50, 50, 50);
 		
 		world.render();
 		town.render();
-		
+
 		renderGui();
 		
-		for(int y=0; y<HEIGHT; y++) {
-			for(int x=0; x<WIDTH; x++) {
-				pixels[x + y * WIDTH] = Screen.pixels[x + y * WIDTH];
-			}
-		}
-		
+		Screen.LIGHTING_ENABLED = true;
+		pixels = Screen.getPostPixels(pixels);		
 		BufferStrategy bs = getBufferStrategy();
 		if(bs == null) {
 			createBufferStrategy(3);
@@ -164,23 +181,18 @@ public class Game extends Canvas implements Runnable {
 	}
 	
 	private void renderGui() {
+		Screen.LIGHTING_ENABLED = false;
 		Screen.centerOn(WIDTH / 2, HEIGHT / 2);
 		Screen.renderRect(0, HEIGHT - 13, WIDTH, 13, 0x3f3f3f);
 		gui.render();
+		Mouse.render();
 		Screen.centerOn(x, y);
 	}
 	
 	public static void main(String[] args) {
 		Game game = new Game();
 		
-		JFrame frame = new JFrame(NAME);
-		frame.setMinimumSize(new Dimension(WIDTH, HEIGHT));
-		frame.setSize(WIDTH * 3, HEIGHT * 3);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLocationRelativeTo(null);
-		frame.add(game);
-		frame.setVisible(true);
-		
+		Screen.makeNormalScreen();
 		game.start();
 	}
 }

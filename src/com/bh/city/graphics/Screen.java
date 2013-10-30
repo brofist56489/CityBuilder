@@ -1,5 +1,14 @@
 package com.bh.city.graphics;
 
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JFrame;
+
 import com.bh.city.Game;
 import com.bh.city.sprites.Sprite;
 import com.bh.city.sprites.Spritesheet;
@@ -10,28 +19,40 @@ public class Screen {
 	public static int HEIGHT = Game.HEIGHT;
 
 	public static boolean LIGHTING_ENABLED = true;
-	public static boolean POST_REDRAW_PIXELS = true;
 
 	public static int xoff = 0;
 	public static int yoff = 0;
 
 	public static int[] pixels;
-	private static int[] lighting;
-	private static int[] preLightPixels;
+	public static int[] red_light;
+	public static int[] green_light;
+	public static int[] blue_light;
+	
+	public static List<Light> lights = new ArrayList<Light>();
 
 	public static void init() {
 		pixels = new int[WIDTH * HEIGHT];
-		lighting = new int[WIDTH * HEIGHT];
+		red_light = new int[WIDTH * HEIGHT];
+		green_light = new int[WIDTH * HEIGHT];
+		blue_light = new int[WIDTH * HEIGHT];
 		for (int i = 0; i < WIDTH * HEIGHT; i++) {
-			lighting[i] = 255;
+			red_light[i] = 0xff;
+			green_light[i] = 0xff;
+			blue_light[i] = 0xff;
 		}
-		preLightPixels = new int[WIDTH * HEIGHT];
 	}
 
-	public static void clearLighting(int l) {
-		for (int i = 0; i < lighting.length; i++) {
-			lighting[i] = l;
-			pixels[i] = 0;
+	public static void clearLighting(int r, int g, int b) {
+		for (int i = 0; i < WIDTH * HEIGHT; i++) {
+			red_light[i] = r;
+			green_light[i] = g;
+			blue_light[i] = b;
+		}
+	}
+	
+	public static void clear(int color) {
+		for(int i = 0; i < pixels.length; i++) {
+			pixels[i] = color;
 		}
 	}
 
@@ -60,9 +81,10 @@ public class Screen {
 				col = s.texture.pixels[xx + yy * w];
 				if (col == 0x7f007f)
 					continue;
-				preLightPixels[i] = col;
-				if (LIGHTING_ENABLED) {
-					col = applyLighting(col, xs + x, ys + y);
+				if(!LIGHTING_ENABLED) {
+					red_light[i] = 0xff;
+					green_light[i] = 0xff;
+					blue_light[i] = 0xff;
 				}
 				pixels[i] = col;
 			}
@@ -84,10 +106,12 @@ public class Screen {
 				
 				int i = (xx + x) + (yy + y) * WIDTH;
 				int col = c;
-				if(LIGHTING_ENABLED) {
-					col = applyLighting(col, i);
+
+				if(!LIGHTING_ENABLED) {
+					red_light[i] = 0xff;
+					green_light[i] = 0xff;
+					blue_light[i] = 0xff;
 				}
-				
 				pixels[i] = col;
 			}
 		}	
@@ -106,11 +130,19 @@ public class Screen {
 			else i2 = (x + w) + (yy + y) * WIDTH;
 			col1 = c;
 			col2 = c;
-			if(LIGHTING_ENABLED) {
-				if(i1 != -1)
-					col1 = applyLighting(col1, i1);
-				if(i2 != -1)
-					col2 = applyLighting(col2, i2);
+			
+			if(!LIGHTING_ENABLED) {
+				if(i1 != -1) {
+					red_light[i1] = 0xff;
+					green_light[i1] = 0xff;
+					blue_light[i1] = 0xff;
+				}
+
+				if(i2 != -1) {
+					red_light[i2] = 0xff;
+					green_light[i2] = 0xff;
+					blue_light[i2] = 0xff;
+				}
 			}
 			if(i1 !=  -1)
 				pixels[i1] = col1;
@@ -119,17 +151,25 @@ public class Screen {
 		}
 		for(int xx = 0; xx<=w; xx++) {
 			if(xx + x < 0|| xx + x >= WIDTH) continue;
-			if(y < 0 || y >=HEIGHT) i1 =  -1; 
+			if(y < 0 || y >= HEIGHT) i1 =  -1; 
 			else i1 = (xx + x) + (y) * WIDTH;
 			if(y + h < 0 || y + h >= HEIGHT) i2 = -1;
 			else i2 = (xx + x) + (h + y) * WIDTH;
 			col1 = c;
 			col2 = c;
-			if(LIGHTING_ENABLED) {
-				if(i1 != -1)
-					col1 = applyLighting(col1, i1);
-				if(i2 != -1)
-					col2 = applyLighting(col2, i2);
+
+			if(!LIGHTING_ENABLED) {
+				if(i1 != -1) {
+					red_light[i1] = 0xff;
+					green_light[i1] = 0xff;
+					blue_light[i1] = 0xff;
+				}
+
+				if(i2 != -1) {
+					red_light[i2] = 0xff;
+					green_light[i2] = 0xff;
+					blue_light[i2] = 0xff;
+				}
 			}
 			if(i1 !=  -1)
 				pixels[i1] = col1;
@@ -139,52 +179,35 @@ public class Screen {
 	}
 
 	private static int applyLighting(int col, int x, int y) {
-		return applyLighting(col, lighting[x + y * WIDTH]);
+		int i = x + y * WIDTH;
+		return applyLighting(col, red_light[i], green_light[i], blue_light[i]);
 	}
 
-	private static int applyLighting(int col, int br) {
-		if (!LIGHTING_ENABLED || br >= 255) {
+	private static int applyLighting(int col, int lr, int lg, int lb) {
+		if (!LIGHTING_ENABLED || (lr == 255 && lg == 255 && lg == 255)) {
 			return col;
 		}
-		int r = (col >> 16) & 0xff;
-		int g = (col >> 8) & 0xff;
-		int b = col & 0xff;
-
-		r = r * br / 255;
-		g = g * br / 255;
-		b = b * br / 255;
+		if(lr + lg + lb <= 0) {
+			return 0;
+		}
+		int r = (col >> 16) & 255;
+		int g = (col >> 8)  & 255;
+		int b = col & 255;
+		
+		r = r * lr / 255;
+		g = g * lg / 255;
+		b = b * lb / 255;
 
 		col = r << 16 | g << 8 | b;
+		
 		return col;
 	}
 
-	public static void addLightSource(int xp, int yp, int r, int br) {
-		xp -= xoff;
-		yp -= yoff;
-
-		if (xp + r < 0 || xp - r >= WIDTH || yp + r < 0 || yp - r >= HEIGHT)
+	public static void addLightSource(Light l) {
+		if(!LIGHTING_ENABLED)
 			return;
-
-		for (int y = -r; y < r; y++) {
-			if (y + yp < 0 || y + yp >= HEIGHT)
-				continue;
-			for (int x = -r; x < r; x++) {
-				if (x + xp < 0 || x + xp >= WIDTH)
-					continue;
-				int d = (x * x) + (y * y);
-				if (d >= r * r)
-					continue;
-
-				int i = (xp + x) + (yp + y) * WIDTH;
-				lighting[i] += br - d * br / (r * r);
-				lighting[i] = (lighting[i] > 255) ? 255 : lighting[i];
-
-				if (POST_REDRAW_PIXELS) {
-					int col = preLightPixels[i];
-					pixels[i] = applyLighting(col, lighting[i]);
-				}
-			}
-		}
+		
+		lights.add(l);
 	}
 
 	public static void centerOn(int x, int y) {
@@ -194,5 +217,53 @@ public class Screen {
 
 	public static void setLighting(boolean on) {
 		LIGHTING_ENABLED = on;
+	}
+	
+	public static int[] getPostPixels(int[] p) {
+		
+		for(Light l : lights) {
+			l.apply();
+		}
+		
+		for(int y = 0; y < HEIGHT; y++) {
+			for(int x = 0; x < WIDTH; x++) {
+				if(!LIGHTING_ENABLED)
+					p[x + y * WIDTH] = pixels[x + y * WIDTH];
+				else
+					p[x + y * WIDTH] = applyLighting(pixels[x + y * WIDTH], x, y);
+			}
+		}
+		
+		return p;
+	}
+	
+	public static void makeFullScreen() {
+		int w = (int)(Toolkit.getDefaultToolkit().getScreenSize()).getWidth();
+		int h = (int)(Toolkit.getDefaultToolkit().getScreenSize()).getHeight();
+		
+		if(Game.frame != null)
+			Game.frame.dispose();
+		Game.frame = new JFrame(Game.NAME);
+		Game.frame.setMaximumSize(new Dimension(w, h));
+		Game.frame.setMinimumSize(new Dimension(w, h));
+		Game.frame.setPreferredSize(new Dimension(w, h));
+		Game.frame.setResizable(false);
+		Game.frame.setUndecorated(true);
+		Game.frame.add(Game.instance);
+		Game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		Game.frame.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "null cursor"));
+		Game.frame.setVisible(true);
+		Game.frame.pack();
+	}
+	
+	public static void makeNormalScreen() {
+		Game.frame = new JFrame(Game.NAME);
+		Game.frame.setMinimumSize(new Dimension(WIDTH, HEIGHT));
+		Game.frame.setSize(WIDTH * 3, HEIGHT * 3);
+		Game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		Game.frame.setLocationRelativeTo(null);
+		Game.frame.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "null cursor"));
+		Game.frame.add(Game.instance);
+		Game.frame.setVisible(true);
 	}
 }

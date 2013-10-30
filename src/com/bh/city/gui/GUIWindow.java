@@ -23,6 +23,13 @@ public class GUIWindow extends GUIObject {
 			this.w = minWid;
 		}
 	}
+	
+	public void tick() {
+		if(y < 0) y = 0;
+		if(x + w <= 0) x = 0;
+		if(y + TOP_BORDER > Screen.HEIGHT) y = Screen.HEIGHT - TOP_BORDER;
+		if(x > Screen.WIDTH) x = Screen.WIDTH - 3;
+	}
 
 	public void addObject(GUIObject o) {
 		objects.add(o);

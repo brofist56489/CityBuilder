@@ -40,6 +40,14 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
 	public static Rectangle getTranslatedRect() {
 		return new Rectangle(x+Screen.xoff, y+Screen.yoff,1,1);
 	}
+	
+	public static int transX() {
+		return x + Screen.xoff;
+	}
+	
+	public static int transY() {
+		return y + Screen.yoff;
+	}
 
 	public static void poll() {
 		x += rx;
