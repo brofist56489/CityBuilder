@@ -13,6 +13,7 @@ import com.bh.city.graphics.Mouse;
 import com.bh.city.graphics.Screen;
 import com.bh.city.gui.GUIImage;
 import com.bh.city.gui.GUIManager;
+import com.bh.city.gui.windows.CreateBuildingWindow;
 import com.bh.city.gui.windows.ResourceListWindow;
 import com.bh.city.input.MouseHandler;
 import com.bh.city.sprites.Sprite;
@@ -72,9 +73,11 @@ public class Game extends Canvas implements Runnable {
 		mouseLight = new Light(0, 0, 50, 255, 255, 255);
 		Screen.addLightSource(mouseLight);
 		
+		Screen.addLightSource(new Light(100, 100, 100, 255, 0, 0));
+		
 		world = World.loadFromImage("/testLevel.png");
 		town = new Town(world);
-		town.addBuilding(new SolarPanel(0, 150, town));
+		town.addBuilding(new SolarPanel(10, 10, town));
 		
 		gui = new GUIManager();
 		gui.addObject(new GUIImage(gui, 10, HEIGHT - 10, Sprite.guimap.getSprite(0)) {
@@ -87,7 +90,7 @@ public class Game extends Canvas implements Runnable {
 		gui.addObject(new GUIImage(gui, 25, HEIGHT - 11, Sprite.guimap.getSprite(1)) {
 			public void onLeftClick() {
 				if(!MouseHandler.buttonDownOnce(1)) return;
-				System.out.println("FUNCTION NOT IMPLEMENTED YET");
+				parent.addObject(new CreateBuildingWindow(parent, 10, 10));
 			}
 		});
 	}
@@ -132,7 +135,6 @@ public class Game extends Canvas implements Runnable {
 	public void tick() {
 		tickCount++;
 		MouseHandler.poll();
-		
 		
 		if(MouseHandler.buttonDown(1)) {
 			if(gui.onLeftClick()) {}

@@ -28,7 +28,7 @@ public class MeshTile extends Tile {
 	protected void render(int x, int y, boolean u, boolean d, boolean l, boolean r, boolean ul, boolean ur, boolean dl, boolean dr) {
 		x *= TILE_WIDTH;
 		y *= TILE_HEIGHT;
-
+		
 		if(u && l) {
 			if(ul)
 				Screen.render(Sprite.tilemap, 4 + textPos, x, y, 0);
